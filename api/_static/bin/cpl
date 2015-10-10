@@ -1,0 +1,63 @@
+#!/bin/bash -eu
+#
+# cpl CURL_CMD [-a]
+#
+
+check_param() {
+  local url=$1
+  local script=$2
+  local param=${3:-"no"}
+
+  if [ $(echo "$script" | grep -c @param) -ne 0 ]; then
+    if [ "$param" == "no" ]; then
+      param=$(echo "$script" | grep @param | sed "s|# @param ||")
+      echo "[error] param '$param' not found"
+      exit 1
+    fi
+    return 0
+  fi
+  return 0
+}
+
+
+cpl() {
+  local curl=$1 && shift
+  
+  local url=$CPL_API/s/curl/$curl
+  local prompt=${1:-d3f4ult}
+
+  local script=$(curl -s "$url" -w '\n{"status":"%{http_code}","time":"%{time_total}"}')
+  
+  # Check status code
+  if [[ $(echo "$script" | tail -1 | grep -c '"status":"200"') -ne 1 ]]; then
+    echo "[error]: $(echo "$script" | tail -1)"
+    exit 1
+  fi
+
+  if [ "$prompt" == "-a" ]; then
+    shift
+  elif [ "$prompt" == "d3f4ult" ]; then
+    prompt=n
+  fi
+
+  cuuurl() {
+    check_param $url "$script" "$@"
+    echo "$script" | head -n -1 | bash -s "$@"
+  }
+
+  if [ "$prompt" == "-a" ]; then
+    echo "$script" | head -n -1
+    echo ""
+    read -p "Press [Yy] to continue... " yn
+    echo ""
+    case $yn in
+        [Yy]* ) cuuurl "$@" ;;
+
+        *     ) exit 0 ;;
+    esac
+  else
+    cuuurl "$@"
+  fi
+}
+
+cpl "$@"

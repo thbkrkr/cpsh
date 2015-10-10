@@ -1,0 +1,9 @@
+# cpl autocompletion
+
+__cpl() {
+  while read curl; do
+    compadd $curl
+  done < <(curl -s $CPL_API/api/ls | jq -r '.[]')
+}
+
+compdef __cpl cpl
