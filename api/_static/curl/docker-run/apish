@@ -1,0 +1,4 @@
+#!/bin/bash -eu
+
+docker run -d -p 82:4242 krkr/apish
+docker run -d -p 83:4242 krkr/apish

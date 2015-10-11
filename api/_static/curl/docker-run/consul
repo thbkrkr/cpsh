@@ -1,0 +1,10 @@
+#!/bin/bash -eu
+
+# @param hostname
+
+docker run -d \
+  -h $1 \
+  -p 8400:8400 \
+  -p 8500:8500 \
+  -p 8600:53/udp \
+  progrium/consul -server -bootstrap

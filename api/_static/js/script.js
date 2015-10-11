@@ -14,13 +14,25 @@ var apiUrl = urlArr[0] + "//" + urlArr[2];
 
 // GET $API/path and replace an HTML element with a Ractive template 
 // populated by the API call JSON response.
-function get(path, el, tpl, cb) {
+function get(path, cb, el, raw) {
+    if (el) {
+        var loader = setTimeout(function() {
+            console.log("loader");
+            elId = el.replace('#', '');
+            document.getElementById(elId).innerHTML = '<div class="spinner"></div>';
+        }, 200);
+    }
+
     microAjax(apiUrl + path, function(data) {
-        var ractive = new Ractive({
-            el: el, template: tpl,
-            data: JSON.parse(data)
-        });
-        cb();
+        if (!raw) {
+            data = JSON.parse(data);
+        }
+        if (cb) {
+            cb(data);
+        }
+        if (el) {
+            clearTimeout(loader);
+        }
     });
 };
 

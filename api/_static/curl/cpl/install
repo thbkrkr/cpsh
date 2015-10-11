@@ -1,0 +1,17 @@
+#!/bin/bash -eu
+
+# @param http://sail-ui.krkr.app.sailabove.io
+
+CPL_API=$1
+
+mkdir -p ~/bin
+curl -s "$CPL_API/s/bin/cpl" > ~/bin/cpl
+curl -s "$CPL_API/s/bin/cpl.autocomplete" > ~/bin/.cpl.autocomplete
+chmod u+x ~/bin/cpl
+
+[[ ! -f ~/.myzshrc ]] && touch ~/.myzshrc
+
+if [[ $(grep -c CPL_API ~/.myzshrc) -eq 0 ]]; then
+  echo "export CPL_API=$CPL_API" >> ~/.myzshrc
+  echo "source ~/bin/.cpl.autocomplete" >> ~/.myzshrc
+fi

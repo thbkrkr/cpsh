@@ -6,7 +6,7 @@
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="mobile-web-app-capable" content="yes">
 
-    <title>cURLaaS</title>
+    <title>cpsh</title>
     <link href="https://fonts.googleapis.com/css?family=Roboto+Condensed" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.rawgit.com/twbs/bootstrap/v4-dev/dist/css/bootstrap.css">
     <link rel="stylesheet" href="/s/css/style.css">
@@ -20,7 +20,7 @@
         <div class="col-sm-offset-1 col-sm-9">
 
           <h3 class="title">
-            cURLaaS 
+            cpsh
           </h3>
 
           <div id="ui-json" class="ui">
@@ -41,7 +41,7 @@
         </fieldset>
       </form>
 
-      {{#each filtered:i}}
+      {{#each filtered}}
       <div class="card">
         <div class="card-block">
           <h4 class="card-title">{{category}}</h4>
@@ -57,7 +57,7 @@
               </span>
               <input type="text" id="{{name}}" class="curl-snippet form-control" readonly value="{{curl}}" onclick="this.select();">
               <span class="input-group-btn">
-                <a class="btn btn-success-outline" href="/s/see.html?c={{category}}&n={{name}}&curl={{curl}}" title="See {{category}}/{{name}} script">
+                <a class="btn btn-success-outline" href="/s/get.html?c={{category}}&n={{name}}&curl={{curl}}" title="See {{category}}/{{name}} script">
                     ->
                 </a>
               </span>
@@ -72,77 +72,67 @@
     <script src="http://cdn.ractivejs.org/latest/ractive.min.js"></script>
     <script src="https://cdn.rawgit.com/zenorocha/clipboard.js/master/dist/clipboard.min.js"></script>
     <script src="/s/js/script.js"></script>
-    
+
     <script>
-        function showTooltip(elem, msg) {
-            elem.setAttribute('class', 'btn tooltipped tooltipped-s');
-            elem.setAttribute('aria-label', msg);
-        }
-        
-        var clipboard = new Clipboard('.btn');
-        clipboard.on('success', function(e) {
-            showTooltip(e.trigger, 'Copied!');
-        });
+      function showTooltip(elem, msg) {
+        elem.setAttribute('class', 'btn tooltipped tooltipped-s');
+        elem.setAttribute('aria-label', msg);
+      }
 
-        function fetch(path, el, tpl, cb) {
-          microAjax(apiUrl + path, function(data) {
-            
-              var ractive = new Ractive({
-                  el: el, template: tpl,
-                  data: {
-                    searchTerm: '',
-                    data: JSON.parse(data),
-                    filtered: []
-                  },
-                  complete: function(){
-                    var r = this
-                    r.observe('searchTerm', function(searchTerm){
-                        var filtered = [];
-                        var data = r.get('data');
+      var clipboard = new Clipboard('.btn');
+      clipboard.on('success', function(e) {
+        showTooltip(e.trigger, 'Copied!');
+      });
 
-                        for (var i = 0; i < data.length; i++) {
-                          var group = data[i];
-                        //r.get('data').filter(function(group) {
-                          var newGroup = {
-                            category: group.category,
-                            curls: []
-                          };
-
-                          for (var j = 0; j < group.curls.length; j++) {
-                            if (group.curls[j].name.indexOf(searchTerm) != -1) {
-                              newGroup.curls.push(group.curls[j]);
-                            }
-                          };
-
-                          if (newGroup.curls.length > 0) {
-                            //return false;
-                            filtered.push(newGroup);
-                          }
-
-                          //return true;
-                        //});
-                        }
-                        console.log(filtered)
-
-                        r.set('filtered', filtered)
-                    })
-                }
-              });
-              cb();
-          });
-        };
-
-        fetch("/api/get", "#ui-json", "#tpl-json", function() {
-            var btns = document.querySelectorAll('.btn');
-            for (var i = 0; i < btns.length; i++) {
-                btns[i].addEventListener('mouseleave', function(e) {
-                    e.currentTarget.setAttribute('class', 'btn btn-primary-outline');
-                    e.currentTarget.removeAttribute('aria-label');
-                });
+      function filter(searchTerm, data) {
+        var filtered = [];
+        for (var i = 0; i < data.length; i++) {
+          var group = data[i];
+          var newGroup = {
+            category: group.category,
+            curls: []
+          };
+          for (var j = 0; j < group.curls.length; j++) {
+            if (group.curls[j].name.indexOf(searchTerm) != -1) {
+              newGroup.curls.push(group.curls[j]);
             }
+          };
+          if (newGroup.curls.length > 0) {
+            filtered.push(newGroup);
+          }
+        }
+        return filtered;
+      }
+
+      get("/api/list", function(data) {
+
+        var btns = document.querySelectorAll('.btn');
+        for (var i = 0; i < btns.length; i++) {
+          btns[i].addEventListener('mouseleave', function(e) {
+            e.currentTarget.setAttribute('class', 'btn btn-primary-outline');
+            e.currentTarget.removeAttribute('aria-label');
+          });
+        }
+
+        new Ractive({
+          el: "#ui-json", template: "#tpl-json",
+          data: {
+            searchTerm: '',
+            data: data,
+            filtered: []
+          },
+          complete: function(){
+            var r = this
+            r.observe('searchTerm', function(searchTerm){
+              var data = r.get('data');
+              var filtered = filter(searchTerm, data);
+              r.set('filtered', filtered);
+            })
             document.getElementById("searchTerm").focus();
+          }
         });
+      });
     </script>
-    
+
   </body>
 </html>

@@ -1,0 +1,5 @@
+#!/bin/bash
+
+# @param pof
+
+echo 'ping \o/ '$1' !'
