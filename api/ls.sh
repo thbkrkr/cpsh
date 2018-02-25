@@ -1,22 +1,21 @@
 #!/bin/bash
 #
-# GET /list     List all curl commands
+# GET /ls  List all sh snippets names
 #
 set -eu
 
 here=$(dirname $(readlink -f $0))
-dir="_static/curl"
 
 main() {
-    c=
-    echo '['
-    while read category; do
-        while read cmd; do
-            echo $c'"'$category'/'$cmd'"'
-            c=,
-        done < <(ls $here/$dir/$category)
-    done < <(ls $here/$dir)
-    echo ']'
+  local c= dir="_static/curl"
+  echo '['
+  while read category; do
+    while read cmd; do
+      echo $c'"'$category'/'$cmd'"'
+      c=,
+    done < <(ls $here/$dir/$category)
+  done < <(ls $here/$dir)
+  echo ']'
 }
 
 main

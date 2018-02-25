@@ -1,7 +1,0 @@
-cpsh:
-  image: krkr/cpsh
-  container_name: cpsh
-  environment:
-    - CPL_API=http://cpsh.blurb.space:83
-  ports:
-    - 83:4242

@@ -1,138 +1,82 @@
 <!doctype html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <meta name="mobile-web-app-capable" content="yes">
+<html><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>cpsh</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="/s/favicon.ico">
+  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.7/semantic.min.css">
+</head><body><style>
 
-    <title>cpsh</title>
-    <link href="https://fonts.googleapis.com/css?family=Roboto+Condensed" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.rawgit.com/twbs/bootstrap/v4-dev/dist/css/bootstrap.css">
-    <link rel="stylesheet" href="/s/css/style.css">
-    <link rel="icon" href="/s/favicon.ico">
-  </head>
+.main .container { padding-top: 2em; }
+form { margin: 20px 0; }
 
-  <body>
+</style><body>
 
-    <div class="container">
-      <div class="row">
-        <div class="col-sm-offset-1 col-sm-9">
+<div class="ui main container">
+  <form class="ui form">
+    <input type="text" id="search" value="" placeHolder="?">
+  </form>
+  <div id="main" class="ui">
+  </div>
+</div>
 
-          <h3 class="title">
-            cpsh
-          </h3>
+<script id="tpl" type="text/html">
+  <% for ( var i in obj ) { %>
+    <h5 class="header"><%= obj[i].category %></h5>
+    <div class="ui list">
+      <% for ( var j in obj[i].curls ) { %>
+      <div class="item">
+        <div class="content">
+          <div class="ui fluid right labeled input">
 
-          <div id="ui-json" class="ui">
-          </div>
-
-          <div class="footer">
-            &copy;krkr
-          </div>
-
-        </div>
-      </div>
-    </div>
-
-    <script id="tpl-json" type="text/ractive">
-      <form>
-        <fieldset class="form-group">
-          <input type="text" id="searchTerm" class="form-control" value="{{searchTerm}}" placeHolder="Search">
-        </fieldset>
-      </form>
-
-      {{#each filtered}}
-      <div class="card">
-        <div class="card-block">
-          <h4 class="card-title">{{category}}</h4>
-        </div>
-        <ul class="list-group list-group-flush">
-          {{#each curls}}
-          <li class="list-group-item">
-            <div class="input-group">
-              <span class="input-group-btn">
-                <button class="btn btn-primary-outline btn-curl-name" data-clipboard-target="#{{name}}">
-                    {{name}}
-                </button>
-              </span>
-              <input type="text" id="{{name}}" class="curl-snippet form-control" readonly value="{{curl}}" onclick="this.select();">
-              <span class="input-group-btn">
-                <a class="btn btn-success-outline" href="/s/get.html?c={{category}}&n={{name}}&curl={{curl}}" title="See {{category}}/{{name}} script">
-                    ->
-                </a>
-              </span>
+            <div class="ui purple basic label" style="min-width: 3em">
+              <%= obj[i].curls[j].name %>
             </div>
-          </li>
-          {{/each}}
-        </ul>
+            <input type="text" readonly onclick="this.select();"
+              id="<%= obj[i].curls[j].name %>" value="<%= obj[i].curls[j].curl %>"
+            >
+            <div class="ui teal basic label">
+              <a href="/s/curl/<%= obj[i].category %>/<%= obj[i].curls[j].name %>"> > </a>
+            </div>
+
+          </div>
+        </div>
       </div>
-      {{/each}}
-    </script>
+      <% } %>
+    </div>
+  <% } %>
+</script>
 
-    <script src="http://cdn.ractivejs.org/latest/ractive.min.js"></script>
-    <script src="https://cdn.rawgit.com/zenorocha/clipboard.js/master/dist/clipboard.min.js"></script>
-    <script src="/s/js/script.js"></script>
+<script src="https://thbkrkr.github.io/s.js/dist/s.14.71cd9dd.zm.js"></script> <script>
 
-    <script>
-      function showTooltip(elem, msg) {
-        elem.setAttribute('class', 'btn tooltipped tooltipped-s');
-        elem.setAttribute('aria-label', msg);
+function filter(searchTerm, data) {
+  var filtered = [];
+  for (var i = 0; i < data.length; i++) {
+    var group = data[i]
+    var newg = {category: group.category, curls: []}
+    for (var j = 0; j < group.curls.length; j++) {
+      if (group.curls[j].name.indexOf(searchTerm) != -1) {
+        newg.curls.push(group.curls[j])
       }
+    }
+    if (newg.curls.length > 0) {
+      filtered.push(newg)
+    }
+  }
+  return filtered
+}
 
-      var clipboard = new Clipboard('.btn');
-      clipboard.on('success', function(e) {
-        showTooltip(e.trigger, 'Copied!');
-      });
+$('#search').on('keyup', function(e) {
+  $('#main').html($tpl('tpl', filter($(this).val(), _data)))
+})
 
-      function filter(searchTerm, data) {
-        var filtered = [];
-        for (var i = 0; i < data.length; i++) {
-          var group = data[i];
-          var newGroup = {
-            category: group.category,
-            curls: []
-          };
-          for (var j = 0; j < group.curls.length; j++) {
-            if (group.curls[j].name.indexOf(searchTerm) != -1) {
-              newGroup.curls.push(group.curls[j]);
-            }
-          };
-          if (newGroup.curls.length > 0) {
-            filtered.push(newGroup);
-          }
-        }
-        return filtered;
-      }
+_data = []
 
-      get("/api/list", function(data) {
+$get("/api/list", function(data) {
+  _data = data
+  $('#main').html($tpl('tpl', _data))
+  $('#search').focus();
+});
 
-        var btns = document.querySelectorAll('.btn');
-        for (var i = 0; i < btns.length; i++) {
-          btns[i].addEventListener('mouseleave', function(e) {
-            e.currentTarget.setAttribute('class', 'btn btn-primary-outline');
-            e.currentTarget.removeAttribute('aria-label');
-          });
-        }
-
-        new Ractive({
-          el: "#ui-json", template: "#tpl-json",
-          data: {
-            searchTerm: '',
-            data: data,
-            filtered: []
-          },
-          complete: function(){
-            var r = this
-            r.observe('searchTerm', function(searchTerm){
-              var data = r.get('data');
-              var filtered = filter(searchTerm, data);
-              r.set('filtered', filtered);
-            })
-            document.getElementById("searchTerm").focus();
-          }
-        });
-      });
-    </script>
-
-  </body>
-</html>
+</script></body></html>

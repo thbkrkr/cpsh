@@ -1,16 +1,3 @@
 #!/bin/bash
 
-sudo locale-gen en_US en_US.UTF-8
-sudo dpkg-reconfigure -f noninteractive locales
-
-# Install dotfiles
-curl -sSL https://raw.github.com/thbkrkr/dotfiles/master/bootstrap/bim | sh
-
-# Install modules
-export IFS=";"
-for module in $1
-do
-  [ -f ~/.dotfiles/install/install-$module.sh ] \
-    && ~/.dotfiles/install/install-$module.sh && echo " --> Module $module OK" \
-    || echo " --> Module $module unknown"
-done
+curl -sSL git.io/biiim |sh

@@ -1,3 +1,2 @@
-FROM krkr/apish
-
+FROM krkr/go-apish
 COPY api /api

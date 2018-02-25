@@ -1,6 +1,6 @@
 #!/bin/bash -eu
 #
-# cpl CURL_CMD [-a]
+# cpl CMD [-a]
 #
 
 check_param() {
@@ -22,12 +22,12 @@ check_param() {
 
 cpl() {
   local curl=$1 && shift
-  
+
   local url=$CPL_API/s/curl/$curl
   local prompt=${1:-d3f4ult}
 
   local script=$(curl -s "$url" -w '\n{"status":"%{http_code}","time":"%{time_total}"}')
-  
+
   # Check status code
   if [[ $(echo "$script" | tail -1 | grep -c '"status":"200"') -ne 1 ]]; then
     echo "[error]: $(echo "$script" | tail -1)"

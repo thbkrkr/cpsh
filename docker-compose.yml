@@ -1,0 +1,6 @@
+cpsh:
+  image: krkr/cpsh
+  environment:
+    - CPL_API=https://cpsh.blurb.space
+  ports:
+    - 83:4242

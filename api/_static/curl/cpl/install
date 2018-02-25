@@ -1,8 +1,8 @@
 #!/bin/bash -eu
 
-# @param http://sail-ui.krkr.app.sailabove.io
+# @param https://cpl.blurb.space
 
-CPL_API=$1
+CPL_API=${1:-CPL_API}
 
 mkdir -p ~/bin
 curl -s "$CPL_API/s/bin/cpl" > ~/bin/cpl
